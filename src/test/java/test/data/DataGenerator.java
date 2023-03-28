@@ -1,49 +1,60 @@
 package test.data;
 
 import com.github.javafaker.Faker;
+import lombok.Value;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class DataGenerator {
-
-    static {
-        new Faker(new Locale("ru"));
+    private DataGenerator() {
     }
 
-    private DataGenerator() {
+    public static String generateDate(int addDays, String dateFormat) {
+        return LocalDate.now().plusDays(addDays).format(DateTimeFormatter.ofPattern(dateFormat));
+    }
+
+    public static String generateCity() {
+        String[] cities = new String[]{"Горно-Алтайск", "Петропавловск-Камчатский", "Санкт-Петербург", "Нижний Новгород", "Ростов-на-Дону", "Южно-Сахалинск", "Великий Новгород", "Йошкар-Ола", "Нарьян-Мар", "Ханты-Мансийск", "Салехард"};
+        int itemIndex = (int) (Math.random() * cities.length);
+        return cities[itemIndex];
+    }
+
+    public static String generateName(String locale) {
+        Faker faker = new Faker(new Locale(locale));
+        String randomName = (faker.name().firstName() + " " + faker.name().lastName() + "-" + faker.name().lastName());
+        return randomName.replace('ё', 'е');
+    }
+
+    public static String generatePhone(String locale) {
+        Faker faker = new Faker(new Locale(locale));
+        return faker.phoneNumber().phoneNumber();
     }
 
     public static class Registration {
         private Registration() {
         }
 
-        public static User generateUser() {
-            return new User(generateCity(), generateDate(3), generateName(), generatePhone());
+        public static UserInfo generateUser(String locale) {
+            return new UserInfo(generateName(locale), generatePhone(locale));
         }
 
-        public static String generateCity() {
-            String[] cities = new String[]{"Москва", "Пенза", "Волгоград", "Саратов", "Казань"};
-            int itemIndex = (int) (Math.random() * cities.length);
-            return cities[itemIndex];
-        }
-
-        public static String generateDate(int daysToAdd) {
-            return LocalDate.now().plusDays(daysToAdd).format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
-        }
-
-        public static String generateName() {
-            Faker faker = new Faker(new Locale("ru"));
-            AtomicReference<String> randomName = new AtomicReference<>(faker.name().firstName() + " " + faker.name().lastName());
-            return randomName.get();
-        }
-
-        public static String generatePhone() {
-            Faker faker = new Faker(new Locale("ru"));
-            return faker.phoneNumber().phoneNumber();
+        public static UserInfoFull generateUserWithCity(String locale) {
+            return new UserInfoFull(generateCity(), generateName(locale), generatePhone(locale));
         }
     }
 
+    @Value
+    public static class UserInfo {
+        String name;
+        String phone;
+    }
+
+    @Value
+    public static class UserInfoFull {
+        String city;
+        String name;
+        String phone;
+    }
 }
